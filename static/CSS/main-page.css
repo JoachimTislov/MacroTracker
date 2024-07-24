@@ -1,0 +1,304 @@
+
+.wrap {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#api_search_result img {
+    max-width: 28%;
+    height: auto;
+}
+
+.center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#sort_select {
+    max-width: 59%;
+    height: auto;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+}
+
+#meal_edit_modal, #ingredient_edit_modal, #select_meal_modal, 
+#create_ingredient_modal, #create_meal_modal, #change_password_modal {
+
+    backdrop-filter: blur(20px);
+
+    display: flex;
+    align-self: center;
+}
+
+#edited_ingredient_alert, #edit_meal_alert, #create_meal_alert, #create_ingredient_alert
+#personal_meal_alert, #personal_ingredient_alert, #user_alert, #register_alert {
+    position: sticky;
+    top: 10px;
+    z-index: 1000;
+}
+
+p {
+    font-size: 0.7em;
+}
+
+#api_search_img {
+    max-width: 30%;
+    height: auto;
+}
+
+#modal-ingredient-size {
+    width: fit-content;
+    margin: 0 auto;
+}
+
+#thebody {
+    background-color: grey;
+    padding-left: 0%;
+    padding-right: 0%;
+    position: absolute;
+    right: 0%;
+    left: 0%;
+}
+#app {
+    background-color: dimgray;
+    padding-left:0%;
+    padding-right: 0%;
+}
+
+#modal-size {
+    width: 200%;
+    display: flex;
+}
+
+#select_sort_meals, #select_sort_ingredients {
+    height: 2.4em;
+}
+#search_meal, #search_ingredients {
+    height: 2.4em;
+}
+.create_button, #update_information_button, #change_password_button {
+    height: 2.7em;
+}
+
+@media screen and (min-width: 1200px) {
+    #thebody {
+        display: flex;
+        width: auto;
+    }
+    
+    #select_day_of_week {
+        height: 2.3em;
+    }
+}
+
+@media screen and (max-width: 750px) {
+    #thebody {
+        display: flex;
+        width: auto;
+        h1 {
+            font-size: 2.5em;
+        }
+        h3 {
+            font-size: 2.2;
+        }
+        h2 {
+            font-size: 1.8em;
+        }   
+        h4 {
+            font-size: 1.2em;
+        }
+        h5 {
+            font-size: 0.9em;
+        }
+        h6{
+            font-size: 0.8em;
+        }
+        #profile, #average_macros, #calender, #logout, #personal_meals, #personal_ingredients{
+            font-size: 1em;
+        }
+        #show_nutrients_button {
+            font-size: 0.8em;
+        }
+        .icon {
+            height: 0.9em;
+            width: 0.9em;
+        }
+        #select_day_of_week {
+            height: 2em;
+        }
+        .create_button, #update_information_button, #change_password_button {
+            height: 2.7em;
+        }
+        #select_sort_meals, #select_sort_ingredients {
+            height: 2.4em;
+        }
+        #search_meal #search_ingredients{
+            height: 2.15em;
+        }
+        label{
+            font-size: 1em;
+        }
+        #create_button_calender {
+            font-size: 0.8em;
+        }
+        .list-group-item {
+            font-size: 1em;
+        }
+        
+
+    }
+}
+
+@media screen and (max-width: 500px) {
+    #thebody {
+        display: flex;
+        width: auto;
+        h2 {
+            font-size: 1.5em;
+        }
+        h3 {
+            font-size: 1.2em;
+        }
+        h4 {
+            font-size: 1em;
+        }
+        h5 {
+            font-size: 0.9em;
+        }
+        h6{
+            font-size: 0.8em;
+        }
+        #profile, #average_macros, #calender, #logout, #personal_meals, #personal_ingredients {
+            font-size: 0.8em;
+        }
+        #show_nutrients_button {
+            font-size: 0.6em;
+        }
+        .icon {
+            height: 0.7em;
+            width: 0.7em;
+        }
+        #select_day_of_week {
+            height:1.8em;
+
+        }
+        .create_button, #update_information_button, #change_password_button {
+            height: 2.2em;
+            font-size: 0.9em;
+        }
+        #select_sort_meals, #select_sort_ingredients {
+            height: 2.2em;
+            font-size: 0.9em;
+        }
+        #search_meal, #search_ingredients {
+            height: 2.2em;
+            font-size: 0.9em;
+        }
+    
+        #create_button_calender {
+            font-size: 0.7em;
+        }
+        .list-group-item {
+            font-size: 0.8em;
+        } 
+    }
+   
+}
+
+@media screen and (max-width: 375px) {
+    #thebody {
+        display: block;
+        width: 375px;
+
+        h2 {
+            font-size: 1.2em;
+        }
+        h3 {
+            font-size: 1em;
+        }
+        h4 {
+            font-size: 0.7em;
+        }
+        #profile, #average_macros, #calender, #logout, #personal_meals, #personal_ingredients {
+            font-size: 0.7em;
+        }
+        #show_ingredient_button{
+            font-size: 0.5em;
+        }
+        #select_day_of_week {
+            height:1.6em;
+
+        }
+        .create_button, #update_information_button, #change_password_button {
+            height: 2em;
+            font-size: 0.9em;
+        }
+        #select_sort_meals, #select_sort_ingredients {
+            height: 2em;
+            font-size: 0.9em;
+
+        }
+        #search_meal, #search_ingredients {
+            height: 2em;
+            font-size: 0.9em;
+        }
+        #create_button_calender {
+            font-size: 0.5em;
+        }
+
+        .list-group-item {
+            font-size: 0.5em;
+        }
+
+        .list-group-item {
+            font-size: 0.7em;
+        } 
+
+    }
+}
+
+
+@media screen and (max-width: 1000px) {
+    #modal-size {
+        width: 150%;
+        display: flex;
+        font-size: 0.7em;
+        h3 {
+            font-size: 2em;
+        }
+        h4 {
+            font-size: 1.5em;
+        }
+        h5 {
+            font-size: 1.5em;
+        }
+        h6 {
+            font-size:1.2em;
+        }
+
+    }
+}
+
+@media screen and (max-width: 750px) {
+    #modal-size {
+        width:auto;
+
+        h3 {
+            font-size: 1.7em;
+        }
+        h4 {
+            font-size: 1.2em;
+        }
+        h5 {
+            font-size: 1.1em;
+        }
+        h6 {
+            font-size:0.8em;
+        }
+    }
+}
+

@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!--https://stackoverflow.com/questions/31075893/how-to-fix-favicon-ico-error-failed-to-load-resource-neterr-empty-response-->
+    <link rel="shortcut icon" href="#">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="main-page">
+    <meta name="keywords" content="html, css">
+    <link rel="stylesheet" href="static/CSS/main-page.css">
+    <!--https://bootswatch.com/darkly/#top-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/darkly/bootstrap.min.css" integrity="sha384-nNK9n28pDUDDgIiIqZ/MiyO3F4/9vsMtReZK39klb/MtkZI3/LtjSjlmyVPS3KdN" crossorigin="anonymous">
+    <script src="https://unpkg.com/vue@3.0.5/dist/vue.global.js"></script>
+    <script src="static/components/personalMeals.js"></script>
+    <script src="static/components/personalIngredients.js"></script>
+    <script src="static/components/mealCalender.js"></script>
+    <script src="static/components/averageMacros.js"></script>
+    <script src="static/components/createMeal.js"></script>
+    <script src="static/components/selectMeal.js"></script>
+    <script src="static/components/editMeal.js"></script>
+    <script src="static/components/editIngredient.js"></script>
+    <script src="static/components/userInfo.js"></script>
+    <script src="static/components/macroBanner.js"></script>
+    <script src="static/components/registerForm.js"></script>
+    <script src="static/components/loginForm.js"></script>
+    <script src="static/components/createIngredient.js"></script>
+    <script src="static/components/changePassword.js"></script>
+    <script src="static/components/validation.js"></script>
+    <script src="static/components/ajax.js"></script>
+    <title> Macro Tracker </title>
+</head>
+<body id="thebody">
+    <main class="container" id="app">
+            <section v-if="authenticated == 'False'">
+                <!-- You are not logged in-->
+                <login-form :cookie="cookie" v-show="user_login"></login-form>
+                <register-form :cookie="cookie" v-show="user_register"></register-form>
+            </section>
+
+            <section v-if="authenticated == 'True'">
+                <macro-banner :username="user_info.username" :cookie="cookie"></macro-banner>
+
+                <section class="column m-3">
+                    <user-information :recommended_calories="recommended_calories" :activity_lvl="activity_lvl" :gender="gender" :user_info="user_info" :calories_needed="calories_needed" v-show="showProfile"></user-information>
+                    <change-password v-show="changePassword"></change-password>
+                    
+                    <average-macros :average_macros_this_week="average_macros_this_week" v-show="showAverageMacros"></average-macros>
+                    
+                    <meal-calender v-show="showCalender" :calender_day="calender_day" :calender_date="calender_date" :number_of_days_in_each_month="number_of_days_in_each_month" :days_in_week="days_in_week" :zero_meals_to_show="zero_meals_to_show" :meals_for_given_date="meals_for_given_date"></meal-calender>        
+                    <select-meal :calender_day="calender_day" :calender_date="calender_date" :personal_meals="personal_meals" v-show="showSelectMeal"></select-meal>
+                
+                </section>
+
+                <section class="m-3 card">
+                    <div class="btn-group btn-group-lg">
+                        <button id="personal_meals" class="btn btn-secondary btn-outline-info" @click="showPersonalMeals = true, toggleButton('personal_meals', true), showPersonalIngredients = false, toggleButton('personal_ingredients', false)"> Personal meals </button>
+                        <button id="personal_ingredients" class="btn btn-secondary btn-outline-info" @click="showPersonalIngredients = true, toggleButton('personal_ingredients', true), showPersonalMeals = false, toggleButton('personal_meals', false)"> Personal ingredients </button>
+                    </div>
+                </section>
+
+                <edit-personal-meal :personal_ingredients="personal_ingredients" :meal_to_edit_ingredients="meal_to_edit_ingredients" :meal_to_edit_meal_info="meal_to_edit_meal_info" v-show="showEditMeal"></edit-personal-meal>
+
+                <create-meal :personal_ingredients="personal_ingredients" v-show="showCreateMeal"></create-meal>
+
+                <personal-meals :personal_meals="personal_meals" v-show="showPersonalMeals"></personal-meals>
+
+                <create-ingredient v-show="showCreateIngredient"></create-ingredient>
+
+                <edit-ingredient :ingredient_to_edit="ingredient_to_edit" v-show="showEditIngredient"></edit-ingredient>
+
+                <personal-ingredients :personal_ingredients="personal_ingredients" v-if="personal_ingredients" v-show="showPersonalIngredients"></personal-ingredients>
+            </section>
+
+            <!-- Child components with only functions -->
+            <validation ref="validation"></validation>
+            <ajax ref="ajax"></ajax>
+            <!----------------------------------------->
+        </main>
+    <script> 
+        let app = Vue.createApp({
+            data(){
+                return {
+                    days_in_week: [],
+
+                    // This is used in the calender, as a reference to how we structure a year
+                    number_of_days_in_each_month: [
+                            {Month: "January", Days: 31},
+                            {Month: "February", Days: 29}, /* 2024 is a leap year */
+                            {Month: "March", Days: 31},
+                            {Month: "April", Days: 30},
+                            {Month: "May", Days: 31},
+                            {Month: "June", Days: 30},
+                            {Month: "July", Days: 31},
+                            {Month: "August", Days: 31},
+                            {Month: "September", Days: 30},
+                            {Month: "October", Days: 31},
+                            {Month: "November", Days: 30},
+                            {Month: "December", Days: 31},
+                        ],
+                    
+                    // Personal schedule, might store this in the database
+                    schedule: [
+                            ["Breakfast", {"Start": 6, "End": 11}], 
+                            ["Lunch", {"Start": 12, "End": 15}], 
+                            ["Dinner", {"Start": 16, "End": 20}], 
+                            ["Supper", {"Start": 21, "End": 24}], 
+                            ["Night", {"Start": 0, "End": 5}] 
+                        ],
+
+                    // User data
+                    personal_meals: [],
+                    personal_ingredients: [],
+                    meals_for_given_date: [],
+
+                    zero_meals_to_show: true,
+                    average_macros_this_week: [],
+
+                    // Initialized for presentation day
+                    calender_day: 'Monday',
+                    calender_date: '10-06-2024',
+
+                    // Variables related to editing 
+                    meal_to_edit_meal_info: [],
+                    meal_to_edit_ingredients: [],
+                    ingredients_for_meal: [],
+                    ingredient_to_edit: [],
+
+                    // Show Booleans
+                    showCalender: true,
+                    showAverageMacros: true,
+
+                    showPersonalMeals: false,
+                    showSelectMeal: false,
+                    showEditMeal: false,
+                    showEditIngredient: false,
+                    showCreateIngredient: false,
+                    showCreateMeal: false,
+                    showPersonalIngredients: false,
+                    changePassword: false,
+
+                    //User profile variables
+                    user_info: [],
+                    gender: "",
+                    activity_lvl: 0,
+                    calories_needed: {},
+                    recommended_calories: 0,
+                    activity_Levels: [],
+                    showProfile: false,
+
+                    initArray: true,
+
+                    // Cookie
+                    cookie: {},
+
+                    user_id: 0,
+
+                    // Login and register
+                    user_login: true,
+                    user_register: false,
+                    authenticated: "",
+
+                }
+            },
+            created() {
+                this.setCookie()
+            },
+            mounted() {
+                // Since its a SPA application we to need check if the user is authenticated each time we update the cookies
+                if(this.authenticated == "True") {
+                    this.loadUserData()
+                }
+            },
+            methods: {
+                    setCookie() {
+                        this.cookie = document.cookie
+                        // Making it easier to access cookie values 
+                        arr = {}
+                        for(let cookie of this.cookie.split(';')) {
+                            let name = cookie.trim().split('=')[0]
+                            let value = cookie.trim().split('=')[1]
+
+                            // This line under is needed because for some reason is message = '"*string*"'
+                            value = value.replace(/^"|"$/g, '');
+                            arr[name] =  value
+                        }
+                        this.cookie = arr
+                        this.authenticated = this.cookie['Authorized']
+
+                        if(this.$refs.ajax && this.authenticated == "True") {
+                            this.loadUserData()
+                        }
+                    },
+                    setSortCookie(sort_value, identifier) {
+                        const json = JSON.stringify({ sort_value: sort_value })
+                        this.$refs.ajax.fetchWithMethodAndJson(`/sort_value/${identifier}`, 'POST', json)
+                    },
+                    loadUserData() {
+                        this.get_user_id()
+                        
+                        this.construct_dates_for_days_in_week()
+
+                        this.load_personal_meals_data()
+                        this.load_personal_ingredients_data()
+                        this.load_average_macros()
+
+                        this.load_meals_for_given_date()
+
+                        this.load_user_info()
+                    },
+                    hideAlertDiv(identifier) {
+                        setTimeout(() => {
+                            message_div = document.getElementById(identifier);
+                            if(message_div) {
+                                message_div.style.display = "none";
+                            }
+                        }, 1500)
+                    },
+                    alertUserWithMessage(identifier, message, color) {
+                        if(document.getElementById(identifier)) {
+
+                            let alert_div = document.getElementById(identifier)
+                            alert_div.innerHTML = '<h4>' + message + '</h4>'
+                            
+                            if(color == "red") {
+                                alert_div.className = "m-1 alert alert-dismissible alert-danger"
+                            } else {
+                                alert_div.className = "m-1 alert alert-dismissible alert-success"
+                            }
+                        
+                            alert_div.style.display = "block"
+                            this.$root.hideAlertDiv(identifier)
+                        }
+                    },
+                    get_user_id() {
+                        // Using cookies
+                        this.user_id = parseInt(this.cookie['user_id'])
+                    },
+                    refreshData() {
+                        this.load_personal_meals_data()
+                        this.load_personal_ingredients_data()
+                        this.load_average_macros()
+                        
+                        // Required since, we only want to refresh it if the user have selected a date
+                        if(this.calender_date != "") {
+                            this.load_meals_for_given_date()
+                        }
+                    },
+                    toggleButton(identifier, bool) {
+                        document.getElementById(identifier).disabled = bool;
+                    },
+                    construct_dates_for_days_in_week() {
+                        const date = new Date(); // Init data
+
+                        let dayOfWeek = date.getDay() - 1; // Day of week, minus one because index in js start with 0
+
+                        let dayOfMonth = date.getDate(); // Date of month
+                    
+                        let month = date.getMonth(); // Which month in number format
+
+                        let year = date.getFullYear();
+
+                        this.days_in_week = [
+                                {Day: "Monday", Date: ""},
+                                {Day: "Tuesday", Date: ""},
+                                {Day: "Wednesday", Date: ""},
+                                {Day: "Thursday", Date: ""},
+                                {Day: "Friday", Date: ""},
+                                {Day: "Saturday", Date: ""},
+                                {Day: "Sunday", Date: ""}
+                            ];
+
+                        /*We want to start at the beginning of the week*/
+                        let start_of_week_date = dayOfMonth-dayOfWeek;
+
+                        /* Checking if its in the beginning of a month */
+                        if(start_of_week_date < 1) {
+
+                            /*Checking if we are moving to previous year */
+                            if(month == 0) {
+                                month = 11
+                                year -= 1
+                            } else {
+                                month -= 1
+                            }
+                            
+                            const days_in_previous_month = this.number_of_days_in_each_month[month]['Days']
+                            
+                            /* We are adding since start_of_week_date is less than 1, zero wont make a difference */
+                            start_of_week_date = days_in_previous_month + start_of_week_date
+                        }
+
+                        for(var i = 0; i < this.days_in_week.length; i++) {
+
+                            this.days_in_week[i]['Date'] = this.check_if_number_is_less_than_10(start_of_week_date) + "-" 
+                            + this.check_if_number_is_less_than_10(month+1) + "-" + year;
+
+                            if(start_of_week_date == this.number_of_days_in_each_month[month]['Days']) {
+                                start_of_week_date = 0;
+                                month += 1;
+
+                                if(month == 12) {
+                                    month = 0
+                                    year += 1
+                                }
+                            }
+
+                            start_of_week_date += 1
+                        }
+                    },
+                    async load_meals_for_given_date() {
+                       this.meal_calender_data = await this.$refs.ajax.fetchResource(`/meal_calender/${this.user_id}/${this.calender_date}`)
+                      
+                        // Initializing
+                        let meals_for_date = {
+                            "Breakfast": [],
+                            "Lunch": [],
+                            "Dinner": [],  
+                            "Supper": [],  
+                            "Night": [],  
+                        }
+
+                        for (let i = 0; i < this.schedule.length; i++) {
+                            this.meal_calender_data.forEach(meal => {
+                                if(parseInt(meal[3].split(':')[0]) >= this.schedule[i][1].Start && parseInt(meal[3].split(':')[0]) <= this.schedule[i][1].End) {
+                                    meals_for_date[this.schedule[i][0]].push(meal)
+                                }
+                            });
+                        }
+                            
+                        // Setting a boolean to easily determine if the are meals to show or not
+                        let count = 0
+                        for (let i = 0; i < this.schedule.length; i++) {
+                            
+                            if(meals_for_date[this.schedule[i][0]].length > 0)  {
+                                this.zero_meals_to_show = false
+                            } else if(meals_for_date[this.schedule[i][0]].length == 0) {
+                                count++
+                            }
+
+                            if(Object.keys(meals_for_date).length == count) {
+                                this.zero_meals_to_show = true
+                            }
+                        }
+                        this.meals_for_given_date = meals_for_date
+                    },
+                    checkIfIngredientIsAlreadyAdded(identifier, ingredients, elementToCompare, key) {
+
+                        for(let ingredient of ingredients) {
+                            if(ingredient[key] == elementToCompare) {
+                                this.$root.alertUserWithMessage(identifier, "You can not add the same ingredient. Instead change the amount", "red")
+                                return false;
+                            } 
+                        }
+                        return true
+
+                    },
+                    editMeal(meal_id) {
+                        this.personal_meals.forEach(entry => {
+                            if(entry['meal_id'] == meal_id) {
+                                this.showEditMeal = true
+
+                                this.meal_to_edit_meal_info = entry
+                                this.meal_to_edit_ingredients = entry['ingredients']
+                            }
+                        })
+                    },
+                    editIngredient(ingredient_id) {
+                        this.personal_ingredients.forEach(entry => {
+                            if(entry['ingredient_id'] == ingredient_id) {
+
+                                this.ingredient_to_edit = entry
+                                this.showEditIngredient = true
+                            }
+                        })
+                    },
+                    check_if_number_is_less_than_10(int) {
+                        if(int < 10) {
+                            return "0" + int
+                        } else {
+                            return int
+                        }
+                    },
+                    showAndHideDivBody(identifier, buttonIdentifier, name) {
+                        div = document.getElementById(identifier)
+                        button = document.getElementById(buttonIdentifier)
+                        
+                        if(div.style.display == "block") {
+                            button.innerHTML = `Show ${name}`
+                            div.style.display = "none";
+                        } else {
+                            button.innerHTML = `Hide ${name}`
+                            div.style.display = "block";
+                        }
+                    },
+                    sortArray(arr, filterObject) {
+                        if(filterObject != 'name') {
+                            //Descending order
+                            arr = arr.sort((a, b) => b[filterObject] - a[filterObject]);
+                        } else {
+                            arr = arr.sort((a, b) => a[filterObject].localeCompare(b[filterObject]));
+                        }
+                        return arr
+                    },
+                    filterArrayByName(searchInput, arr) {
+                        const filtered_arr = arr.filter(function (entry) {
+                            return entry['name'].toLowerCase().includes(searchInput.toLowerCase())
+                        })
+
+                        return filtered_arr
+                    },
+                    async load_personal_meals_data() {
+                        this.personal_meals = await this.$refs.ajax.fetchResource(`/personal_meals/${this.user_id}`)
+                    },
+                    async load_personal_ingredients_data() {
+                        this.personal_ingredients = await this.$refs.ajax.fetchResource(`/personal_ingredients/${this.user_id}`)
+                    },
+                    async load_average_macros() {
+                        const average_macros_data = await this.$refs.ajax.fetchResource(`/average_macros/${this.user_id}`)
+
+                        // Initializing
+                        average_macros_this_week = {
+                            "Calories": 0,
+                            "Protein": 0,
+                            "Carbohydrates": 0,
+                            "Fat": 0,
+                            "Sugar": 0,
+                        }
+                        
+                        // Adding all of the nutrients for the given week 
+                        this.days_in_week.forEach(entry => {
+                        average_macros_data.forEach(line => {
+                                if(entry['Date'] == line[2] /* the date */) {
+                                    average_macros_this_week['Protein'] += line[1][3]
+                                    average_macros_this_week['Calories'] += line[1][4]
+                                    average_macros_this_week['Carbohydrates']  += line[1][5]
+                                    average_macros_this_week['Fat']  += line[1][6]
+                                    average_macros_this_week['Sugar']  += line[1][7]
+                                }
+                            })
+                        });
+                        
+                        // Calculating the average macro for the given week
+                        for(let key in average_macros_this_week) {
+                            average_macros_this_week[key] = Math.round(average_macros_this_week[key]/7)
+                        }
+
+                        this.average_macros_this_week = average_macros_this_week
+                    }, 
+
+                    // User functions underneath
+                    async load_user_info() {
+                        this.user_info = await this.$refs.ajax.fetchResource(`/user_info/${this.user_id}`)
+
+                        this.setGender()
+                        this.setActivity()
+                        this.calc_calories_needed()
+
+                        if(this.initArray) {
+                            this.initializeActivityArray()
+                            this.initArray = false
+                        }
+                    },
+                    initializeActivityArray() {
+                        //// This is a way to show the right activity lvl to the user ///
+                        // Might be a much easier way, but this works ///
+                        let arr = [
+                            this.activity_Levels[this.activity_lvl - 1],
+                        ]
+
+                        for(let entry of this.activity_Levels) {
+                            if(this.activity_lvl != entry['lvl']) {
+                                arr.push(entry)
+                            }
+                        }
+
+                        this.calories_needed = arr
+                    },
+                    setGender() {
+                        if(this.user_info['gender'] == 1) {
+                            this.gender = "Male"
+                        } else {
+                            this.gender = "Female"
+                        }
+                    },
+                    setActivity() {
+                        activity_Levels = [
+                            "Sedentary",
+                            "Lightly Active",
+                            "Moderately Active",
+                            "Very Active",
+                            "Super Active"
+                        ]
+
+                        this.activity_lvl = parseInt(this.user_info['activity_lvl'])  
+                        this.user_info['activity_lvl'] = activity_Levels[parseInt(this.activity_lvl - 1)]
+                    },
+                    calc_calories_needed() {
+                        weight = this.user_info['weight']
+                        height = this.user_info['height']
+                        age = this.user_info['age']
+                        gender = this.user_info['gender']
+
+                        //Source: https://mohap.gov.ae/en/more/awareness-center/calories-calculation#:~:text=If%20you%20are%20sedentary%20(little,Calorie%2DCalculation%20%3D%20BMR%20x%201.55
+                        
+                        /*
+                        If you are sedentary (little or no exercise) : Calorie-Calculation = BMR x 1.2
+                        If you are lightly active (light exercise/sports 1-3 days​/week) : Calorie-Calculation = BMR x 1.375
+                        If you are moderately active (moderate exercise/sports 3-5 days/week) : Calorie-Calculation = BMR x 1.55
+                        If you are very active (hard exercise/sports 6-7 days a week) : Calorie-Calculation = BMR x 1.725
+                        If you are extra active (very hard exercise/sports & physical job or 2x training) : Calorie-Calculation = BMR x 1.9
+                        */
+
+                        /*
+                        10 * weight (kg) + 6.25 * height(cm) - 5 * age(y) + 5 for (man)
+
+                        10 * weight(kg) + 6.25 * height(cm) - 5 * age(y) - 161 for ​(woman)
+                        */
+
+                        BMR = 10 * weight + 6.25 * height - 5 * age
+
+                        if(gender = "Male") { BMR += 5 } 
+                        if(gender = "Female") { BMR -= 161 }
+
+                        this.activity_Levels = [
+                            {"lvl": 1, "activity": "Sedentary", "calories": Math.round(BMR*1.2)},
+                            {"lvl": 2, "activity": "Lightly Active", "calories": Math.round(BMR*1.375),},
+                            {"lvl": 3, "activity": "Moderately Active", "calories": Math.round(BMR*1.55)},
+                            {"lvl": 4, "activity": "Very Active", "calories": Math.round(BMR*1.725)},
+                            {"lvl": 5, "activity": "Super Active", "calories": Math.round(BMR*1.9)},
+                        ]
+
+                        this.recommended_calories = this.activity_Levels[this.activity_lvl - 1].calories
+                    },
+                }
+            });
+            app.component("register-form", registerForm);
+            app.component("login-form", loginForm);
+            app.component("macro-banner", macroBanner);
+            app.component("user-information", userInfo);
+            app.component("meal-calender", mealCalender);
+            app.component("personal-meals", personalMeals);
+            app.component("personal-ingredients", personalIngredients);
+            app.component("average-macros", averageMacros);
+            app.component("create-meal", createMeal);
+            app.component("select-meal", selectMeal);
+            app.component("edit-personal-meal", editMeal);
+            app.component("edit-ingredient", editIngredient);
+            app.component("create-ingredient", createIngredient);
+            app.component("changePassword", changePassword);
+
+            ///// Code separation, for simplicity /////
+            app.component("validation", validation)
+            app.component("ajax", ajax)
+            ///////////////////////////
+
+            app.mount('#app'); 
+    </script>
+</body>
+</html>
