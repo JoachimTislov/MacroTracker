@@ -249,8 +249,6 @@ const ajax = {
         async addMealToGivenDate(meal_id, isHourValid, isMinutesValid, calender_date, hour, minutes) {
             if(isHourValid && isMinutesValid) {
                 try {
-                    console.log(calender_date)
-
                     const time = `${this.$root.check_if_number_is_less_than_10(parseInt(hour))}:${this.$root.check_if_number_is_less_than_10(parseInt(minutes))}`
                     const json = JSON.stringify({"id": meal_id, "date": calender_date, "time": time})
                     const response = await this.fetchWithMethodAndJson('/calender/', 'POST', json)

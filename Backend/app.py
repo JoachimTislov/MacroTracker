@@ -6,15 +6,15 @@ import sqlite3
 
 from setup_db import create_connection
 
-from insert_queries import add_user, add_meal_to_calender, add_ingredient, add_ingredient_to_meal, add_meal
+from Queries.insert_queries import add_user, add_meal_to_calender, add_ingredient, add_ingredient_to_meal, add_meal
 
-from delete_queries import delete_meal, delete_meal_from_calender, delete_ingredient, delete_ingredient_from_specific_meal_with_ingredient_and_meal_id, delete_ingredient_from_meals_with_ingredient_id, delete_ingredients_from_meal_with_meal_id
+from Queries.delete_queries import delete_meal, delete_meal_from_calender, delete_ingredient, delete_ingredient_from_specific_meal_with_ingredient_and_meal_id, delete_ingredient_from_meals_with_ingredient_id, delete_ingredients_from_meal_with_meal_id
 
-from select_queries import (select_user_by_id, select_all_users_username, select_password_for_given_user, select_user_id_and_username, select_all_users_username_except_one, select_all_users_emails_except_one,
+from Queries.select_queries import (select_user_by_id, select_all_users_username, select_password_for_given_user, select_user_id_and_username, select_all_users_username_except_one, select_all_users_emails_except_one,
 select_meal_calender, select_personal_meals_with_ingredients, select_user_no_by_username, select_meals_the_ingredient_were_in, select_users_meals, select_users_ingredients, select_users_calender_entries,
 select_info_for_user_by_id, select_average_macros, select_personal_ingredients, select_ingredient_by_id, select_password_by_id, select_user_profile_picture_path, select_all_users_emails)
 
-from update_queries import (update_user_info, update_personal_meal, update_password_by_user_id,
+from Queries.update_queries import (update_user_info, update_personal_meal, update_password_by_user_id,
 							update_ingredient, update_personal_meal_name, update_total_macros_of_meal_ingredient_was_used_for, UPDATE_reCalcMacrosForMeals, update_user_profile_picture)
 
 from inputValidation import isUsernameValid, isPasswordValid, validateUserInfo, isIngredientValid, isMealNameValid, validateIngredients_for_meal, validateOwnership, isCalenderDateAndTimeValid, validatePicture
@@ -23,9 +23,9 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 
 from encryption import get_hashed_password, check_password
 
-picture_folder = "static/users_pictures"
+picture_folder = "../static/users_pictures"
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.secret_key = 'secret_key'
 app.config['picture_folder'] = picture_folder
 
