@@ -1,6 +1,6 @@
 import sqlite3
 
-from Queries.select_queries import select_meal_by_id
+from select_queries import select_meal_by_id
 
 ######## UPDATE QUERIES ########
 def update_user_info(conn, user_id, name, username, age, email, height, weight, gender, activity_lvl):

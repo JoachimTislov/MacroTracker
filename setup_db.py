@@ -3,7 +3,7 @@ from sqlite3 import Error
 
 from example_data import meal_calender_data, personal_ingredients_data, ingredients_for_each_meal_data, personal_meals_data, users_data
 
-from Queries.insert_queries import add_user_with_all_information, add_meal, add_ingredient, add_ingredient_to_meal, add_meal_to_calender
+from insert_queries import add_user_with_all_information, add_meal, add_ingredient, add_ingredient_to_meal, add_meal_to_calender
 
 import os
 
