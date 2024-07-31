@@ -25,7 +25,7 @@ from encryption import get_hashed_password, check_password
 
 picture_folder = "../static/users_pictures"
 
-app = Flask(__name__, template_folder='/templates', static_folder='/static')
+app = Flask(__name__, template_folder='./templates', static_folder='./static')
 app.secret_key = 'secret_key'
 app.config['picture_folder'] = picture_folder
 
@@ -738,6 +738,6 @@ def average_macros(user_id):
 			return 'Unauthorized', 401
 		
 if __name__ == '__main__':
-	app.run()
+	app.run(debug=True)
 
 
